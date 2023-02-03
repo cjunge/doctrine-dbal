@@ -141,6 +141,21 @@ class SqlitePlatform extends AbstractPlatform
     }
 
     /**
+     * Namespaces index with the table name, as sqlite requires unique index names per database
+     *
+     * {@inheritDoc}
+     */
+    public function getCreateIndexSQL(Index $index, $table)
+    {
+        if (!$index->isPrimary()) { // leave the primary index alone
+            $name = ($table instanceof Table ? $table->getName() : $table) . '_' . $index->getName();
+            $index = new Index($name, $index->getColumns(), $index->isUnique(), $index->isPrimary(), $index->getFlags(), $index->getOptions());
+        }
+
+        return parent::getCreateIndexSQL($index, $table);
+    }
+
+    /**
      * {@inheritdoc}
      */
     protected function getDateArithmeticIntervalExpression($date, $operator, $interval, $unit)
